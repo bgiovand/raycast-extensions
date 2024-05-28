@@ -1,5 +1,6 @@
 import { Token, tokenAuthHeader, tokenValid } from '../entities/Token';
 import { FlatIcon } from '../entities/FlatIcon';
+import fetch from 'cross-fetch';
 
 export const searchIcons = async (token: Token, search: string): Promise<{ list: FlatIcon[]; error?: Error }> => {
   if (!tokenValid(token)) return { list: [] };
@@ -14,11 +15,11 @@ const makeRequestForIcons = async (token: Token, search: string): Promise<{ list
   const params = new URLSearchParams({ q: search });
   const response = await fetch(`${uri}?${params}`, options(token));
 
-  const body = (await response.json()) as { data: IconResponse[]; status?: string; message?: string };
+  const body = (await response.json()) as { data?: IconResponse[]; status?: string; message?: string };
 
   if (body.status && body.status === 'error') return { list: [], error: new Error(body.message) };
 
-  return { list: body.data };
+  return { list: body.data ?? [] };
 };
 
 const uri = 'https://api.flaticon.com/v3/search/icons';

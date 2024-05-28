@@ -1,5 +1,29 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - 2023-11-30
+
+- Add livescores to the Schedule view for terminated and in progress games
+- Use team’s full name instead of an abbreviation for better readability
+
+## [Improvements] - 2023-11-14
+
+- Add the option to choose the default conference (East or West) and to view standings for the whole league.
+
+## [Fix] - 2023-10-30
+
+- Add a rule to set the year according to the start of the new NBA season, traditionally in October.
+
+## [Fix] - 2023-03-12
+
+- Fix data (wins, losses, seed) in "View Standings" command. More robustly find stats by name instead of index.
+- Add a dropdown to "View Standings" command to view by conference
+- Rank standings in "View Standings" command in terms of seeding.
+
+## [Fixes] - 2023-01-08
+
+- Fix data (wins, losses, rank) in "View Standings" command
+- Fix display of weekday in "View Upcoming Games" command
+
 ## [Improvements] - 2022-08-15
 
 - Added Cache APIs to speed up the commands.

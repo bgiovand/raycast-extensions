@@ -45,7 +45,7 @@ export interface Content {
   extraTime: boolean;
   shootout: boolean;
   goals: Goal[];
-  penaltyShootouts: any[];
+  penaltyShootouts: unknown[];
   behindClosedDoors: boolean;
   id: number;
   altIds: AltIDS;
@@ -215,6 +215,15 @@ export interface TeamTeam {
   shortName: string;
   id: number;
   altIds: AltIDS;
+  metadata: {
+    communities_twitter: string;
+    club_highlights_internal_url: string;
+    club_highlights_internal_description: string;
+    communities_facebook: string;
+    communities_youtube: string;
+    communities_instagram: string;
+    communities_URL: string;
+  };
 }
 
 export interface Club {

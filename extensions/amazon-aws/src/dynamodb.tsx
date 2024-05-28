@@ -2,7 +2,8 @@ import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -25,14 +26,12 @@ export default function DynamoDb() {
 function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
+      key={tableName}
       title={tableName || ""}
       icon={"aws-icons/ddb.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={`${AWS_URL_BASE}/dynamodbv2/home?region=${process.env.AWS_REGION}#table?name=${tableName}`}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(tableName, "AWS::DynamoDB::Table")} />
           <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>
       }
@@ -41,9 +40,9 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
 }
 
 async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
-    new ListTablesCommand({ ExclusiveStartTableName: token })
+    new ListTablesCommand({ ExclusiveStartTableName: token }),
   );
   const combinedTables = [...(accTables || []), ...(TableNames || [])];
 

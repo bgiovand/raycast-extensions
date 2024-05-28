@@ -1,27 +1,31 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
+import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<{ includeForks: boolean }>();
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
-    [searchText, searchFilter]
+    () =>
+      `${searchFilter} ${searchText} sort:updated-desc fork:${preferences.includeForks} ${
+        preferences.includeArchived ? "" : "archived:false"
+      }`,
+    [searchText, searchFilter],
   );
 
   const {
@@ -30,17 +34,25 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20 });
+      const result = await github.searchRepositories({
+        query,
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+      });
 
       return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
+
+  // Update visited repositories (history) if any of the metadata changes, especially the repository name.
+  useEffect(() => {
+    history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
+  }, [data]);
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data]
+    [data],
   );
 
   return (
@@ -85,10 +97,4 @@ function SearchRepositories() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchRepositories />
-    </View>
-  );
-}
+export default withGitHubClient(SearchRepositories);

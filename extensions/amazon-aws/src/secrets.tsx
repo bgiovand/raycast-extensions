@@ -8,7 +8,8 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function Secrets() {
   const [search, setSearch] = useState<string>("");
@@ -55,7 +56,7 @@ function Secret({
   const { data: secretDetails } = useCachedPromise(fetchSecret, [secret.ARN]);
   return (
     <List.Item
-      id={secret.Name || ""}
+      key={secret.ARN}
       icon={"aws-icons/secretsmanager.png"}
       title={secret.Name || ""}
       detail={
@@ -79,12 +80,7 @@ function Secret({
           <Action title={showValue ? "Hide Value" : "Show Value"} onAction={() => setShowValue()} />
           <Action.CopyToClipboard title="Copy Value" content={secretDetails?.SecretString || ""} />
           <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
-          <Action.OpenInBrowser
-            title="Open Secret"
-            url={`${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(secret.Name || "")}&region=${
-              process.env.AWS_REGION
-            }`}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")} />
           <Action.CopyToClipboard title="Copy Name" content={secret.Name || ""} />
         </ActionPanel>
       }
@@ -96,16 +92,16 @@ function Secret({
 async function fetchSecrets(
   search: string,
   token?: string,
-  accSecrets?: SecretListEntry[]
+  accSecrets?: SecretListEntry[],
 ): Promise<SecretListEntry[]> {
   if (search.length < 4) return [];
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
 
   const { NextToken, SecretList } = await new SecretsManagerClient({}).send(
     new ListSecretsCommand({
       NextToken: token,
       Filters: [{ Key: "all", Values: [search] }],
-    })
+    }),
   );
 
   const combinedLogGroups = [...(accSecrets || []), ...(SecretList || [])];
@@ -120,7 +116,7 @@ async function fetchSecrets(
 async function fetchSecret(arn?: string): Promise<{ SecretString?: string; SecretBinary?: Uint8Array } | undefined> {
   if (!arn) return;
   const { SecretString, SecretBinary } = await new SecretsManagerClient({}).send(
-    new GetSecretValueCommand({ SecretId: arn })
+    new GetSecretValueCommand({ SecretId: arn }),
   );
   return { SecretString, SecretBinary };
 }

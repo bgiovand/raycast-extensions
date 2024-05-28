@@ -1,31 +1,32 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
-
+import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
 import {
   createInterval,
   getCurrentInterval,
   resetInterval,
   pauseInterval,
   continueInterval,
-  IntervalType,
-  Interval,
   isPaused,
   duration,
   preferences,
   progress,
+  endOfInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
+import { Interval, IntervalType } from "../lib/types";
+
+const IconTint: Color.Dynamic = {
+  light: "#000000",
+  dark: "#FFFFFF",
+  adjustContrast: false,
+};
 
 export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    launchCommand({
-      name: "pomodoro-control-timer",
-      type: LaunchType.UserInitiated,
-      context: { currentInterval },
-    });
-    resetInterval();
+    endOfInterval(currentInterval);
   }
 
   function onStart(type: IntervalType) {
@@ -45,13 +46,18 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
-  let icon = "tomato.png";
+  let icon: Image.ImageLike;
+  icon = { source: "tomato-0.png", tintColor: IconTint };
   if (currentInterval) {
-    const progressInQuarters = Math.floor(progress(currentInterval) / 25) * 25;
-    icon = Icon[(progressInQuarters > 0 ? `CircleProgress${progressInQuarters}` : "Circle") as keyof typeof Icon];
+    const progressInTenth = 100 - Math.floor(progress(currentInterval) / 10) * 10;
+    icon = { source: `tomato-${progressInTenth}.png`, tintColor: IconTint };
   }
 
-  const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
+  const title = preferences.enableTimeOnMenuBar
+    ? currentInterval
+      ? secondsToTime(currentInterval.length - duration(currentInterval))
+      : "--:--"
+    : undefined;
 
   return (
     <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
@@ -82,21 +88,21 @@ export default function TogglePomodoroTimer() {
       ) : (
         <>
           <MenuBarExtra.Item
-            title={`Focus`}
+            title={FocusText}
             subtitle={`${preferences.focusIntervalDuration}:00`}
             icon={`🎯`}
             onAction={() => onStart("focus")}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <MenuBarExtra.Item
-            title={`Short Break`}
+            title={ShortBreakText}
             subtitle={`${preferences.shortBreakIntervalDuration}:00`}
             icon={`🧘‍♂️`}
             onAction={() => onStart("short-break")}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <MenuBarExtra.Item
-            title={`Long Break`}
+            title={LongBreakText}
             subtitle={`${preferences.longBreakIntervalDuration}:00`}
             icon={`🚶`}
             onAction={() => onStart("long-break")}

@@ -5,6 +5,9 @@
   "description": "The Pokédex is an invaluable tool to Trainers in the Pokémon world.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "miguel-felix1"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"
@@ -36,7 +39,7 @@
     {
       "name": "language",
       "title": "Language",
-      "description": "Your prefered language. Supporting Pokémon command only.",
+      "description": "Your preferred language. Supporting Pokémon command only.",
       "required": false,
       "type": "dropdown",
       "default": "9",
@@ -81,22 +84,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "axios": "^0.27.2",
-    "json2md": "^1.12.0",
+    "@raycast/api": "^1.68.1",
+    "axios": "^1.6.7",
+    "json2md": "^2.0.1",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@types/json2md": "^1.5.1",
-    "@types/lodash.groupby": "^4.6.6",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/node": "~20.11.20",
+    "@types/react": "^18.2.59",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

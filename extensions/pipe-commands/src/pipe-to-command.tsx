@@ -9,40 +9,66 @@ import {
   showToast,
   Image,
   closeMainWindow,
-  popToRoot,
   getSelectedText,
   environment,
   confirmAlert,
   getPreferenceValues,
+  getSelectedFinderItems,
+  open,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync, existsSync } from "fs";
 import path from "path";
 import React, { useEffect, useState } from "react";
 import untildify from "untildify";
-import { ScriptCommand } from "./types";
-import { InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
+import { ScriptCommand, InputType } from "./types";
+import { getActiveTabUrl, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
-type InputType = "text" | "clipboard";
-
-export function PipeCommands(props: { inputFrom?: InputType }): JSX.Element {
-  const { inputFrom } = props;
+export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
   const [state, setState] = useState<{ commands: ScriptCommand[]; invalid: InvalidCommand[] }>();
 
-  const loadCommands = async () => {
+  const refreshCommands = async () => {
     const { commands, invalid } = await parseScriptCommands();
-    setState({ commands: await sortByAccessTime(commands), invalid });
+
+    // treat clipboard commands the same as text, just different source
+    const transformedInputType = props.inputType === "clipboard" ? "text" : props.inputType;
+
+    const filteredCommands = commands.filter((command) => {
+      switch (command.metadatas.mode) {
+        case "pipe":
+          // If the input is not defined, we assume it's a text input
+          if (!command.metadatas.inputType?.type) {
+            return transformedInputType === "text";
+          }
+          return command.metadatas.inputType.type === transformedInputType;
+        default:
+          return command.metadatas.argument1.type === transformedInputType;
+      }
+    });
+
+    setState({ commands: await sortByAccessTime(filteredCommands), invalid });
   };
 
   useEffect(() => {
-    loadCommands();
+    refreshCommands();
   }, []);
 
+  function generatePlaceholder(inputType: string | undefined) {
+    switch (inputType) {
+      case "text":
+        return "Pipe selected text or clipboard contents to";
+      case "url":
+        return "Pipe active browser tab URL to";
+      default:
+        return `Pipe ${inputType} to`;
+    }
+  }
+
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${inputFrom} to`}>
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={generatePlaceholder(props.inputType)}>
       <List.Section title="Commands">
         {state?.commands.map((command) => (
-          <PipeCommand key={command.path} command={command} inputFrom={inputFrom} onTrash={loadCommands} />
+          <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
         ))}
       </List.Section>
       <List.Section title="Invalid Commands">
@@ -93,8 +119,27 @@ async function getInput(inputType: InputType) {
       }
       return clipboard;
     }
-    case "text":
-      return getSelectedText();
+
+    case "text": {
+      const selection = await getSelectedText();
+
+      if (selection) {
+        return selection;
+      } else {
+        throw new Error("No text selected");
+      }
+    }
+    case "file": {
+      const selection = await getSelectedFinderItems();
+      if (selection.length == 0) {
+        throw new Error("No file selected");
+      }
+
+      return selection[0].path;
+    }
+    case "url": {
+      return getActiveTabUrl();
+    }
   }
 }
 
@@ -148,13 +193,17 @@ function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onT
 async function runCommand(command: ScriptCommand, inputType: InputType) {
   const toast = await showToast(Toast.Style.Animated, "Running...");
   const input = await getInput(inputType);
+
   let args: string[];
-  if (command.metadatas.argument1) {
+
+  if (command.metadatas.mode === "silent") {
     args = command.metadatas.argument1.percentEncoded ? [encodeURIComponent(input)] : [input];
   } else {
     args = [];
   }
+
   chmodSync(command.path, "755");
+
   const { stdout, stderr, status } = spawnSync(command.path, args, {
     encoding: "utf-8",
     cwd: command.metadatas.currentDirectoryPath
@@ -162,6 +211,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
       : path.dirname(command.path),
     input: command.metadatas.mode === "pipe" ? input : undefined,
     env: {
+      // TODO this is a lttle scary and doesn't seem like best practice?
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },
     maxBuffer: 10 * 1024 * 1024,
@@ -194,7 +244,6 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         const output = await runCommand(command, inputFrom);
         if (output) await onSuccess(output);
         await closeMainWindow();
-        await popToRoot();
       } catch (e) {
         const toast = await showToast({
           title: "An error occured",
@@ -236,10 +285,15 @@ function CommandActions(props: { command: ScriptCommand; inputFrom: InputType })
         />
       );
 
+      const openInBrowser = (
+        <Action key="open-url" icon={Icon.Globe} title="Open in Browser" onAction={outputHandler(open)} />
+      );
+
       return (
-        <React.Fragment>
+        <>
+          {command.metadatas.outputType == "url" ? openInBrowser : null}
           {primaryAction === "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}
-        </React.Fragment>
+        </>
       );
     }
   }

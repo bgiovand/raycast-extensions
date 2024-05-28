@@ -3,7 +3,8 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function CloudWatch() {
   const [search, setSearch] = useState<string>("");
@@ -36,15 +37,11 @@ function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
   return (
     <List.Item
       icon={"aws-icons/cw.png"}
+      key={logGroup.logGroupName}
       title={logGroup.logGroupName || ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Log Group"
-            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
-              process.env.AWS_REGION
-            }#logsV2:log-groups/log-group/${encodeURIComponent(logGroup.logGroupName || "")}`}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")} />
           <Action.CopyToClipboard title="Copy Log Group Name" content={logGroup.logGroupName || ""} />
         </ActionPanel>
       }
@@ -54,10 +51,10 @@ function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
 
 async function fetchLogGroups(search: string, token?: string, accLogGroups?: LogGroup[]): Promise<LogGroup[]> {
   if (search.length < 4) return [];
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
 
   const { nextToken, logGroups } = await new CloudWatchLogsClient({}).send(
-    new DescribeLogGroupsCommand({ nextToken: token, logGroupNamePattern: search || undefined })
+    new DescribeLogGroupsCommand({ nextToken: token, logGroupNamePattern: search || undefined }),
   );
 
   const combinedLogGroups = [...(accLogGroups || []), ...(logGroups || [])];

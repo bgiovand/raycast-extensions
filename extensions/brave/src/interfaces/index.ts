@@ -2,10 +2,30 @@ import { ReactNode } from "react";
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
+export interface Preferences {
+  readonly useOriginalFavicon: boolean;
+  readonly openTabInProfile: SettingsProfileOpenBehaviour;
+  readonly browserOption: SettingsBrowserOption;
+}
+
+export enum SettingsBrowserOption {
+  Default = "Brave Browser",
+  Beta = "Brave Browser Beta",
+  Nightly = "Brave Browser Nightly",
+}
+
+export enum SettingsProfileOpenBehaviour {
+  Default = "default",
+  ProfileCurrent = "profile_current",
+  ProfileOriginal = "profile_original",
+}
+
 export interface SearchResult<T> {
   readonly isLoading: boolean;
   readonly errorView?: ReactNode;
   readonly data?: T[];
+  readonly revalidate?: (profileId: string) => void;
+  readonly profile: BraveProfile;
 }
 
 export interface HistoryEntry {
@@ -74,4 +94,9 @@ export interface ExecError extends Error {
   code: number;
   stdout: string;
   stderr: string;
+}
+
+export interface BraveProfile {
+  readonly name: string;
+  readonly id: string;
 }

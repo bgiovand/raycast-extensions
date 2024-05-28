@@ -8,8 +8,7 @@ export type TaskFormValues = {
   name: string;
   assignee: string;
   due_date: Date | null;
+  start_date: Date | null;
 };
 
-export default function Command(props: { draftValues?: TaskFormValues }) {
-  return withAsanaAuth(<CreateTaskForm draftValues={props.draftValues} />);
-}
+export default withAsanaAuth(CreateTaskForm);

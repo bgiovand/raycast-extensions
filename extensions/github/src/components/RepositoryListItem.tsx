@@ -1,6 +1,6 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
@@ -14,16 +14,32 @@ type RepositoryListItemProps = {
 };
 
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
+  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
+
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
-  const updatedAt = new Date(repository.updatedAt);
+  const updatedAt = repository.pushedAt ? new Date(repository.pushedAt) : new Date(repository.updatedAt);
 
   const accessories: List.Item.Accessory[] = [
     {
       date: updatedAt,
-      tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
+      tooltip: `Updated ${formatDistanceToNow(updatedAt, { addSuffix: true })}`,
     },
   ];
+
+  if (repository.isArchived) {
+    accessories.unshift({
+      tag: { value: "Archived", color: Color.Orange },
+      tooltip: "This repository is archived",
+    });
+  }
+
+  if (repository.isFork) {
+    accessories.unshift({
+      tag: { value: "Fork", color: Color.Purple },
+      tooltip: "This repository is a fork",
+    });
+  }
 
   if (repository.primaryLanguage) {
     accessories.unshift({
@@ -42,7 +58,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
   return (
     <List.Item
       icon={owner.icon}
-      title={repository.name}
+      title={`${preferences.displayOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
       {...(numberOfStars > 0
         ? {
             subtitle: {

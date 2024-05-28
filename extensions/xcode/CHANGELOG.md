@@ -1,5 +1,80 @@
 # Xcode Changelog
 
+## [Clear SwiftUI Previews Cache] - 2024-04-03
+
+- Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory
+- Improved "Clear Swift Package Manager Cache" command
+
+## [Maintenance Update] - 2024-01-10
+
+- Removed "Search Swift Package Index" command due to the unavailability of the underlying API
+
+## [Maintenance Update] - 2023-10-28
+
+- Added an option to open the App Group directory from the "Show Recent Builds in Menu Bar"
+- Added missing Xcode 15 icon when searching for Xcode releases
+
+## [Updates to Simulator and Recent Builds] - 2023-10-07
+
+- Added Restart Simulator
+- Added Rename Simulator
+- Added Push Notifications using a payload
+- Added iCloud Sync
+- Added Open AppGroup directory
+  
+## [Updated Swift Package Types] - 2023-10-03
+
+- Updated Swift Package types when creating a new Swift Package.
+
+## [Xcode Project List] - 2023-08-15
+
+- The favorites section will always be shown at first in the "Search Recent Projects" command.
+
+## [Xcode 15 Beta Icon] - 2023-07-28
+
+- Added Xcode 15 Beta icon when searching for Xcode releases.
+
+## [Change Data Source for List Apple Devices] - 2023-07-28
+
+- Changed the data source for the "List Apple Devices" command so it doesn't rely on a text file anymore.
+
+## [List Apple Devices] - 2023-07-25
+
+- Added "List Apple Devices" command to have a list of Apple devices and their matching product name/code name.
+
+## [Filtering Simulators on State with Dropdown] - 2023-07-02
+
+- Added a dropdown in simulators list to filter simulators on the boot state.
+
+## [Bug Fix] - 2023-06-21
+
+- Fixed a bug where creating a Swift playground failed due to an incorrect date format.
+
+## [Bug Fix] - 2023-02-26
+
+- Fixed a bug where the URL to an Apple's developer documentation entry wasn't constructed correctly.
+
+## [Open URLs in the iOS Simulator] - 2023-02-03
+
+- Added “Open URL in Simulator” command to open URLs such as deeplinks in the iOS Simulator.
+
+## [Bug Fix] - 2023-02-03
+
+- Fixed a bug where the URL to Apple's developer documentation wasn't created correctly.
+
+## [Bug Fix] - 2023-02-01
+
+- Fixed a bug where the URL of a Swift package wasn't created correctly.
+
+## [Recent Builds Performance Improvements] - 2023-01-24
+
+- Improved the performance of the "Search Recent Builds" and "Show Recent Builds in Menu Bar" command.
+
+## [Code Snippets] - 2023-01-02
+
+- Added "Create Code Snippet" command to create a new Xcode Code Snippet.
+- Added "Search Code Snippets" command to search and edit your Xcode Code Snippets.
+
 ## [Search Recent Builds Menu Bar] - 2022-11-29
 
 - Added "Show Recent Builds in Menu Bar" command to view the latest builds of your apps installed on a simulator.
@@ -19,7 +94,7 @@
 
 ## [Menu Bar Project Favorites] - 2022-10-14
 
-- Added an option to show Xcode Project favorites in the menu bar. 
+- Added an option to show Xcode Project favorites in the menu bar.
 
 ## [Confirmation Alerts] - 2022-10-05
 

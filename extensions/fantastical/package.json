@@ -5,6 +5,9 @@
   "description": "Create Fantastical events and reminders using Fantasticals natural language processing.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -18,9 +21,9 @@
   ],
   "commands": [
     {
-      "name": "fan-add-event",
-      "title": "Add Fantastical Calendar Event",
-      "description": "add a new fantastical event",
+      "name": "fan-add-event-editable",
+      "title": "Add Fantastical Event",
+      "description": "Add a new Fantastical event",
       "mode": "no-view",
       "arguments": [
         {
@@ -41,7 +44,7 @@
       ]
     },
     {
-      "name": "fan-reminder",
+      "name": "fan-add-reminder-editable",
       "title": "Add Fantastical Reminder",
       "description": "Add a new Fantastical reminder",
       "mode": "no-view",
@@ -62,11 +65,59 @@
         "fan add reminder",
         "fan reminder"
       ]
-      
+    },
+    {
+      "name": "fan-quick-add-reminder",
+      "title": "Quickly Add Fantastical Reminder",
+      "description": "Add a new reminder without opening Fantastical",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "add",
+          "title": "Add Reminder",
+          "placeholder": "reminder",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "fantastical",
+        "fan",
+        "add",
+        "reminder",
+        "fan add reminder",
+        "fan reminder",
+        "quick"
+      ]
+    },
+    {
+      "name": "fan-quick-add-event",
+      "title": "Quickly Add Fantastical Event",
+      "description": "Add a new event without opening Fantastical",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "add",
+          "title": "Add Event",
+          "placeholder": "event",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "fantastical",
+        "fan",
+        "add",
+        "event",
+        "fan add event",
+        "fan event",
+        "quick"
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "default-browser-id": "^3.0.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

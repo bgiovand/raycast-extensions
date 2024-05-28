@@ -1,6 +1,6 @@
-import { environment } from "@raycast/api";
 import { useState } from "react";
 import {
+  checkForOverlyLoudAlert,
   createCustomTimer,
   deleteCustomTimer,
   ensureCTFileExists,
@@ -8,8 +8,10 @@ import {
   readCustomTimers,
   startTimer,
   stopTimer,
-} from "../timerUtils";
-import { CustomTimer, Timer } from "../types";
+  toggleCustomTimerMenubarVisibility,
+} from "../backend/timerBackend";
+import { CTLaunchConfig, CustomTimer, Timer, TimerLaunchConfig } from "../backend/types";
+import { Alert, Icon, confirmAlert } from "@raycast/api";
 
 export default function useTimers() {
   const [timers, setTimers] = useState<Timer[] | undefined>(undefined);
@@ -25,33 +27,57 @@ export default function useTimers() {
     setIsLoading(false);
   };
 
-  const handleStartTimer = (seconds: number, name: string) => {
-    startTimer(seconds, name);
+  const handleStartTimer = (launchConf: TimerLaunchConfig) => {
+    if (!checkForOverlyLoudAlert(launchConf.launchedFromMenuBar)) return;
+    startTimer(launchConf);
     refreshTimers();
   };
 
   const handleStopTimer = (timer: Timer) => {
     setTimers(timers?.filter((t: Timer) => t.originalFile !== timer.originalFile));
-    stopTimer(`${environment.supportPath}/${timer.originalFile}`);
+    stopTimer(timer.originalFile);
     refreshTimers();
   };
 
-  const handleStartCT = (customTimer: CustomTimer) => {
-    startTimer(customTimer.timeInSeconds, customTimer.name);
+  const handleStartCT = ({ customTimer, launchedFromMenuBar }: CTLaunchConfig) => {
+    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
+    startTimer({
+      timeInSeconds: customTimer.timeInSeconds,
+      launchedFromMenuBar: launchedFromMenuBar,
+      timerName: customTimer.name,
+      selectedSound: customTimer.selectedSound,
+    });
     refreshTimers();
   };
 
   const handleCreateCT = (timer: Timer) => {
+    // TODO: make it possible to provide selected sound into CustomTimer
     const customTimer: CustomTimer = {
       name: timer.name,
       timeInSeconds: timer.secondsSet,
+      selectedSound: "default",
+      showInMenuBar: true,
     };
     createCustomTimer(customTimer);
     refreshTimers();
   };
 
-  const handleDeleteCT = (ctID: string) => {
-    deleteCustomTimer(ctID);
+  const handleDeleteCT = async (ctID: string) => {
+    const options: Alert.Options = {
+      title: "Delete this preset?",
+      icon: Icon.Trash,
+      message: "You won't be able to recover it.",
+      dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+    };
+    if (await confirmAlert(options)) {
+      deleteCustomTimer(ctID);
+      refreshTimers();
+    }
+  };
+
+  const handleToggleCTVisibility = async (ctID: string) => {
+    toggleCustomTimerMenubarVisibility(ctID);
     refreshTimers();
   };
 
@@ -65,5 +91,6 @@ export default function useTimers() {
     handleStartCT,
     handleCreateCT,
     handleDeleteCT,
+    handleToggleCTVisibility,
   };
 }

@@ -1,6 +1,120 @@
 # Linear Changelog
 
-## [Fix icons] - 2022-20-12
+## [Bug Fixes] - 2024-05-25
+
+- Fixed milestones to be updated with "Create Issue" command
+
+## [Improvements] - 2024-05-14
+
+- Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)
+- Updated Project Icons
+
+## [Added two new actions] - 2024-05-10
+
+- Added two new toast actions: `Copy Issue ID as Link` and `Copy Issue Title as Link`
+
+## [Fix missing icons] - 2024-05-01
+
+- Update missing Linear icons
+
+## [Improvements] - 2024-04-29
+
+- Add pagination when searching issues
+- Rename "Assigned Issues" to "My Issues"
+
+## [New icons] - 2024-04-26
+
+- Use new Linear icons
+
+## [Fix Creating issue with milestone] - 2024-04-23
+
+- Fix defining `milestoneId` in payload.
+
+## [Enhanced Notifications] - 2024-03-12
+
+- Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
+- You can now copy the URL of a notification's related item directly from the notification panel.
+
+## [Improve Notifications search] - 2024-03-01
+
+- It's possible to search your notifications by issue identifiers, issue titles, or usernames.
+
+## [Fix images in issues] - 2024-02-02
+
+- Images are now properly loaded when looking at the details of an issue.
+
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
+## [Fix projects search not working] - 2024-01-30
+
+- The projects search was not working in case there were no roadmaps available. This is now fixed.
+
+## [Add Favorites command] - 2024-01-05
+
+- Add `Favorites` command to browse your Linear favorites right from Raycast.
+
+## [Add issue links] - 2023-12-29
+
+- Add support for issue links. It is now possible to see the number of links an issue has from the detail view. You can also browse them in a dedicated view.
+
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
+## [Include team key as keyword in Create Issue command] - 2023-09-22
+
+Added the team key as a keyword in the "Create Issue" function so that it will appear when the user searches for a key.
+
+## [Fix] - 2023-08-23
+
+Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.
+
+## [Add milestone functionality] - 2023-08-16
+
+Linear now allows users to create milestones within projects. This feature is now available on this extension.
+
+## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
+
+Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.
+
+## [Set title field as default in Create Issue command] - 2023-05-02
+
+Previously, the `Team` field was the default one when the user had more than one team in the `Create Issue` command. Since users often add issues to the same team, let's make the `Title` field the default.
+
+## [Remove Raycast signature] - 2023-04-19
+
+- Remove Raycast signature preference from the `Create Issue` command
+
+## [Add multiple attachments when creating an issue] - 2023-02-28
+
+- Add support for multiple attachments in the `Create Issue` command
+- Fixed a bug where the title form field was not focused if the teams field was hidden.
+
+## [Add support for roadmaps] - 2023-02-23
+
+- Add roadmaps dropdown in `Search Projects` command
+- Add target date and teams accessories in `Search Projects` command
+
+## [Adjust colors contrast in light mode] - 2023-02-08
+
+- Adjust color contrast on icons so that they're more visible in light mode
+
+## [Add attachment to Create Issue command] - 2023-01-24
+
+- Add a file picker on the `Create Issue` command to add a single attachment on a newly created Linear issue
+
+## [Add due date action] - 2023-01-19
+
+- Add a new action to set due dates on issues
+- Add due date accessory on issue list items
+
+## [Quick Add Comment to Issue command] - 2023-01-18
+
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
+
+## [Fix icons] - 2022-12-20
 
 - Fix a bug where Linear icons would not show up in the list's accessories for projects
 - Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist

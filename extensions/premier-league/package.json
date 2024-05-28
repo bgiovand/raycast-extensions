@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "table",
-      "title": "Standings",
+      "title": "Tables",
       "subtitle": "Premier League",
       "description": "View the latest Premier League tables, form guides and season archives.",
       "mode": "view"
@@ -53,24 +53,45 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "filter",
+      "title": "Search bar filter",
+      "description": "Choose your preffered filter in the search bar for Fixtures & Results",
+      "required": false,
+      "type": "dropdown",
+      "default": "competition",
+      "data": [
+        {
+          "title": "Filter by Competition",
+          "value": "competition"
+        },
+        {
+          "title": "Filter by Club",
+          "value": "club"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "axios": "^0.26.0",
-    "date-fns": "^2.28.0",
-    "json2md": "^1.12.0",
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "json2md": "^2.0.0",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@types/json2md": "^1.5.1",
-    "@types/lodash.groupby": "^4.6.6",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/node": "~20.10.1",
+    "@types/react": "^18.2.39",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.3.2"
   },
   "scripts": {
     "build": "ray build -e dist",

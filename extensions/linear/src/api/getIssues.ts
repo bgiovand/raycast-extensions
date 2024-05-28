@@ -1,6 +1,29 @@
-import { Comment, Cycle, Issue, Project, Team, User, WorkflowState } from "@linear/sdk";
+import {
+  Comment,
+  Cycle,
+  Issue,
+  IssueRelation,
+  Project,
+  ProjectMilestone,
+  Team,
+  User,
+  WorkflowState,
+} from "@linear/sdk";
+import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
+import { getPaginated, PageInfo } from "./pagination";
+
+const DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_LIMIT = 50;
+
+function getPageLimits() {
+  const preferences = getPreferenceValues<Preferences>();
+  const limit = preferences.limit ? +preferences.limit : DEFAULT_LIMIT;
+  const pageSize = Math.min(DEFAULT_PAGE_SIZE, limit);
+  const pageLimit = Math.floor(limit / pageSize);
+  return { pageSize, pageLimit };
+}
 
 export const IssueFragment = `
   id
@@ -10,6 +33,7 @@ export const IssueFragment = `
   priority
   priorityLabel
   estimate
+  dueDate
   updatedAt
   url
   number
@@ -63,6 +87,10 @@ export const IssueFragment = `
     icon
     color
   }
+  projectMilestone {
+    id
+    name
+  }
 `;
 
 export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
@@ -78,6 +106,7 @@ export type IssueResult = Pick<
   | "priorityLabel"
   | "updatedAt"
   | "estimate"
+  | "dueDate"
   | "number"
 > & {
   assignee?: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
@@ -97,41 +126,58 @@ export type IssueResult = Pick<
   parent?: Pick<Issue, "id" | "title" | "number"> & { state: Pick<WorkflowState, "type" | "color"> };
 } & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
+} & {
+  projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 
-export async function getLastUpdatedIssues() {
+export async function getLastUpdatedIssues(after?: string) {
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+  const { data } = await graphQLClient.rawRequest<
+    { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    Record<string, unknown>
+  >(
     `
-      query {
-        issues(orderBy: updatedAt) {
+      query($after: String) {
+        issues(first: 25, orderBy: updatedAt, after: $after) {
           nodes {
             ${IssueFragment}
           }
-        }
-      }
-    `
-  );
-
-  return data?.issues.nodes;
-}
-
-export async function searchIssues(query: string) {
-  const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ issueSearch: { nodes: IssueResult[] } }, Record<string, unknown>>(
-    `
-      query($query: String!) {
-        issueSearch(query: $query) {
-          nodes {
-            ${IssueFragment}
+          pageInfo {
+            hasNextPage
+            endCursor
           }
         }
       }
     `,
-    { query }
+    { after },
   );
 
-  return data?.issueSearch.nodes;
+  return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
+}
+
+export async function searchIssues(query: string, after?: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<
+    { issueSearch: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    { query: string; after?: string }
+  >(
+    `
+      query($query: String!, $after: String) {
+        issueSearch(first: 25, query: $query, after: $after) {
+          nodes {
+            ${IssueFragment}
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `,
+    { query, after },
+  );
+
+  return { issues: data?.issueSearch.nodes, pageInfo: data?.issueSearch.pageInfo };
 }
 
 export async function getLastCreatedIssues() {
@@ -145,13 +191,13 @@ export async function getLastCreatedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.issues.nodes;
 }
 
-export async function getAssignedIssues() {
+export async function getMyIssues() {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<
     { viewer: { assignedIssues: { nodes: IssueResult[] } } },
@@ -167,7 +213,7 @@ export async function getAssignedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.assignedIssues.nodes;
@@ -189,7 +235,7 @@ export async function getCreatedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.createdIssues.nodes;
@@ -201,25 +247,39 @@ export async function getActiveCycleIssues(cycleId?: string) {
   }
 
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<
-    { cycle: { issues: { nodes: IssueResult[] } } },
-    Record<string, unknown>
-  >(
-    `
-      query($cycleId: String!) {
-        cycle(id: $cycleId) {
-          issues {
-            nodes {
-              ${IssueFragment}
+
+  const { pageSize, pageLimit } = getPageLimits();
+
+  const nodes = getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<
+        { cycle: { issues: { nodes: IssueResult[]; pageInfo: PageInfo } } },
+        Record<string, unknown>
+      >(
+        `
+          query($cycleId: String!, $cursor: String) {
+            cycle(id: $cycleId) {
+              issues(first: ${pageSize}, after: $cursor) {
+                nodes {
+                  ${IssueFragment}
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
             }
           }
-        }
-      }
-    `,
-    { cycleId }
+        `,
+        { cycleId, cursor },
+      ),
+    (r) => r.data?.cycle.issues.pageInfo,
+    (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.cycle.issues.nodes || []),
+    [],
+    pageLimit,
   );
 
-  return data?.cycle.issues.nodes;
+  return nodes;
 }
 
 export async function getProjectIssues(projectId: string) {
@@ -234,7 +294,25 @@ export async function getProjectIssues(projectId: string) {
         }
       }
     `,
-    { projectId }
+    { projectId },
+  );
+
+  return data?.issues.nodes;
+}
+
+export async function getProjectMilestoneIssues(milestoneId: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+    `
+      query($milestoneId: ID) {
+        issues(filter: { projectMilestone: { id: { eq: $milestoneId } } }) {
+          nodes {
+            ${IssueFragment}
+          }
+        }
+      }
+    `,
+    { milestoneId },
   );
 
   return data?.issues.nodes;
@@ -258,7 +336,7 @@ export async function getSubIssues(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -299,7 +377,7 @@ export async function getComments(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -309,21 +387,71 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
-export type IssueDetailResult = IssueResult & Pick<Issue, "description" | "dueDate">;
+export type Attachment = {
+  id: string;
+  title: string;
+  subtitle: string;
+  source?: {
+    imageUrl?: string;
+  };
+  url: string;
+  updatedAt: string;
+};
+
+export type IssueDetailResult = IssueResult &
+  Pick<Issue, "description" | "dueDate"> & {
+    attachments?: {
+      nodes: Attachment[];
+    };
+    relations?: {
+      nodes: [
+        Pick<IssueRelation, "id" | "type"> & {
+          relatedIssue: Pick<Issue, "identifier" | "title"> & {
+            state: Pick<WorkflowState, "type" | "color">;
+          };
+        },
+      ];
+    };
+  };
 
 export async function getIssueDetail(issueId: string) {
   const { graphQLClient } = getLinearClient();
+
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
+          attachments {
+            nodes {
+              id
+              title
+              subtitle
+              source
+              url
+              updatedAt
+            }
+          }
           description
-          dueDate
+          relations {
+            nodes {
+              id
+              type
+              relatedIssue {
+                id
+                identifier
+                title
+                state {
+                  color
+                  type
+                }
+              }
+            }
+          }
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {

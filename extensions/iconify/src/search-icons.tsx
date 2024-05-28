@@ -2,7 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
-  List,
+  Grid,
   getPreferenceValues,
 } from '@raycast/api';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ import Service, { Icon } from './service';
 import { toDataURI, toSvg, toURL } from './utils';
 
 const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+  getPreferenceValues<{ primaryAction: 'paste' | 'copy' | 'pasteName' }>();
 
 const service = new Service();
 
@@ -36,8 +36,14 @@ function Command() {
   }
 
   return (
-    <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
-      <List.EmptyView
+    <Grid
+      throttle
+      columns={8}
+      inset={Grid.Inset.Medium}
+      isLoading={isLoading}
+      onSearchTextChange={queryIcons}
+    >
+      <Grid.EmptyView
         title="No results"
         description={getEmptyViewDescription(query, isLoading)}
       />
@@ -51,9 +57,13 @@ function Command() {
         const copy = (
           <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
         );
+
+        const pasteName = setId && (
+          <Action.Paste title="Paste Name" content={`${setId}:${id}`} />
+        );
         return (
-          <List.Item
-            icon={{
+          <Grid.Item
+            content={{
               source: dataURIIcon,
               tintColor: body.includes('currentColor')
                 ? Color.PrimaryText // Monochrome icon
@@ -61,22 +71,28 @@ function Command() {
             }}
             key={`${setId}:${id}`}
             title={id}
-            accessories={[
-              {
-                text: setName,
-              },
-            ]}
+            subtitle={setName}
             actions={
               <ActionPanel>
-                {primaryAction === 'paste' ? (
+                {primaryAction === 'paste' && (
                   <>
                     {paste}
                     {copy}
+                    {pasteName}
                   </>
-                ) : (
+                )}
+                {primaryAction === 'copy' && (
                   <>
                     {copy}
                     {paste}
+                    {pasteName}
+                  </>
+                )}
+                {primaryAction === 'pasteName' && (
+                  <>
+                    {pasteName}
+                    {paste}
+                    {copy}
                   </>
                 )}
                 <Action.CopyToClipboard
@@ -92,7 +108,7 @@ function Command() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }
 

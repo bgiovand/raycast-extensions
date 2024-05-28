@@ -1,5 +1,13 @@
 # SM.MS Changelog
 
+## [Copy markdown link] - {PR_MERGE_DATE}
+
+- Now you can copy the image link in Markdown form
+
+## [Upload images from clipboard] - 2023-02-02
+
+- Images can now be uploaded from the clipboard (must be a file copied in the finder or link to an image)
+
 ## [Add alternate domain] - 2022-12-05
 
 - Add alternate domain name selection

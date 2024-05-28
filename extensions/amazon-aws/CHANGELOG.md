@@ -1,6 +1,79 @@
 # Amazon AWS Changelog
 
+## [CFN and SQS] - 2024-05-21
+
+- Adds update-termination-protection commands for stacks listed in CFN command ([#12497](https://github.com/raycast/extensions/issues/12497))
+- Adds listing exports feature to CFN command
+- Additional metadata for the SQS queues mapped into list item details ([#12498](https://github.com/raycast/extensions/issues/12498))
+- Adds SendMessage action for queues
+
+## [Improvements] - 2024-05-15
+
+- Fix resource types for Step Function Command Actions ([#12353](https://github.com/raycast/extensions/issues/12353))
+- Fix S3 Objects console links
+- Fix CodePipeline accessory icon and visual improvements
+- Fix CloudFormation stack resources list item key for disambiguation
+- Added keys to most list items for disambiguation and copy link action for urls ([#11750](https://github.com/raycast/extensions/issues/11750))
+
+## [ECR] - 2024-04-14
+
+- Added support for navigating AWS ECR repositories
+
+## [S3 folders] - 2024-04-14
+
+- Added support for navigating S3 buckets using folders
+
+## [Step Functions command] - 2024-02-18
+
+- Added new command to find and open Step Functions ([#10801](https://github.com/raycast/extensions/pull/10801))
+
+## [Make Vault Optional] - 2023-11-16
+
+- Make vault optional for people who have it installed but do not want to use it.
+
+## [Fix Broken Secrets Manager Link] - 2023-08-14
+
+- Fix broken region-routing for secrets manager links.
+
+## [Fix Broken Authentication] - 2023-05-06
+
+- Fix regression from AWS Vault changes that affected all non-aws-vault users.
+
+## [Extend Support AWS Vault] - 2023-04-28
+
+- Add support for people using aws-vault with the GetSessionToken API call.
+- Add support for aws-vault usage with a master-credentials approach.
+
+## [Support AWS Vault] - 2023-04-03
+
+- Add support for people using aws-vault to manage their sessions.
+
+## [Add Profile Script Command] - 2023-03-15
+
+- Add "Run Profile Script" command that allows users to list profiles and run a custom script for them.
+
+## [Add Show All Action] - 2023-03-08
+
+- Add "Show All" action to SSM Parameters to bypass the requirement of needing four characters for search.
+
+## [Fix Profile Dropdown] - 2023-03-04
+
+- Fix profile dropdown issue when reading from credentials file
+
+## [Renamed command] - 2023-02-03
+
+- Renamed Elasticsearch Service to OpenSearch Service
+
+## [ECS Command] - 2023-01-06
+
+- Added command for forcing a new deployment on a given service
+
+## [CloudFormation Resources List] - 2022-12-25
+
+- Added support for viewing CloudFormation resources from within Raycast ([#4054](https://github.com/raycast/extensions/pull/4054))
+
 ## [ECS Command] - 2022-12-14
+
 - Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
 - Added support for viewing Lambda logs from within Raycast or the browser
 

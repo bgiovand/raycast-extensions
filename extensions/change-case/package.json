@@ -3,26 +3,66 @@
   "name": "change-case",
   "title": "Change Case",
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
+  "type": "module",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "nagauta",
+    "PWrzesinski"
+  ],
+  "keywords": [
+    "text",
+    "transform",
+    "string",
+    "sponge"
   ],
   "license": "MIT",
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "commands": [
     {
       "name": "change-case",
       "title": "Change Case",
-      "description": "Change the text in the clipboard",
+      "description": "Change the case of the selected text or text in the clipboard",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "lowercaseTextBeforeTransform",
+      "type": "checkbox",
+      "default": false,
+      "title": "Behavior",
+      "description": "Input text is not lowercased before transformations, which may result in unexpected behavior at times. See the README.md for more details.",
+      "label": "Lowercase Text Before Changing Case",
+      "required": false
+    },
+    {
+      "name": "popToRoot",
+      "type": "checkbox",
+      "default": false,
+      "title": "Behavior",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
+      "label": "Pop to Root after Action",
+      "required": true
+    },
+    {
       "name": "source",
       "type": "dropdown",
-      "title": "Preferred source",
-      "description": "Choose a preferred text source. If not available, both are tried.",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is selected, clipboard is used.",
       "data": [
         {
           "title": "Selected",
@@ -37,6 +77,24 @@
       "required": false
     },
     {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "default": "paste",
+      "required": false
+    },
+    {
       "name": "CamelCase",
       "type": "checkbox",
       "title": "Enabled Transformations",
@@ -48,7 +106,6 @@
     {
       "name": "CapitalCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"Capital Case\" Transformation",
       "label": "Capital Case",
       "default": true,
@@ -57,7 +114,6 @@
     {
       "name": "ConstantCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"CONSTANT_CASE\" Transformation",
       "label": "Constant Case",
       "default": true,
@@ -66,7 +122,6 @@
     {
       "name": "DotCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"dot.case\" Transformation",
       "label": "Dot Case",
       "default": true,
@@ -75,7 +130,6 @@
     {
       "name": "HeaderCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"Header-Case\" Transformation",
       "label": "Header Case",
       "default": true,
@@ -84,7 +138,6 @@
     {
       "name": "KebabCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"kebab-case\" Transformation",
       "label": "Kebab Case",
       "default": true,
@@ -93,7 +146,6 @@
     {
       "name": "LowerCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"lower case\" Transformation",
       "label": "Lower Case",
       "default": true,
@@ -102,7 +154,6 @@
     {
       "name": "LowerFirst",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"lower First\" Transformation",
       "label": "Lower First",
       "default": true,
@@ -111,7 +162,6 @@
     {
       "name": "MacroCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"MACRO_CASE\" Transformation",
       "label": "Macro Case",
       "default": true,
@@ -120,7 +170,6 @@
     {
       "name": "NoCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"no case\" Transformation",
       "label": "No Case",
       "default": true,
@@ -129,7 +178,6 @@
     {
       "name": "ParamCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"param-case\" Transformation",
       "label": "Param Case",
       "default": true,
@@ -138,16 +186,22 @@
     {
       "name": "PascalCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"PascalCase\" Transformation",
       "label": "Pascal Case",
       "default": true,
       "required": false
     },
     {
+      "name": "PascalSnakeCase",
+      "type": "checkbox",
+      "description": "Enable the \"Pascal_Snake_Case\" Transformation",
+      "label": "Pascal Snake Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "PathCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"path/case\" Transformation",
       "label": "Path Case",
       "default": true,
@@ -156,7 +210,6 @@
     {
       "name": "RandomCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"rAndOm cAsE\" Transformation",
       "label": "Random Case",
       "default": true,
@@ -165,7 +218,6 @@
     {
       "name": "SentenceCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"Sentence case\" Transformation",
       "label": "Sentence Case",
       "default": true,
@@ -174,7 +226,6 @@
     {
       "name": "SnakeCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"snake_case\" Transformation",
       "label": "Snake Case",
       "default": true,
@@ -183,7 +234,6 @@
     {
       "name": "SwapCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"sWAP cASE\" Transformation",
       "label": "Swap Case",
       "default": true,
@@ -192,7 +242,6 @@
     {
       "name": "TitleCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"Title Case\" Transformation",
       "label": "Title Case",
       "default": true,
@@ -201,7 +250,6 @@
     {
       "name": "UpperCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"UPPER CASE\" Transformation",
       "label": "Upper Case",
       "default": true,
@@ -210,7 +258,6 @@
     {
       "name": "UpperFirst",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"Upper first\" Transformation",
       "label": "Upper First",
       "default": true,
@@ -219,32 +266,40 @@
     {
       "name": "SpongeCase",
       "type": "checkbox",
-      "title": "",
       "description": "Enable the \"SPonGE CasE\" Transformation",
       "label": "Sponge Case",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "TrainCase",
+      "type": "checkbox",
+      "description": "Enable the \"Train-Case\" Transformation",
+      "label": "Train Case",
       "default": true,
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.44.0",
-    "change-case-all": "^1.0.14",
-    "execa": "^6.1.0"
+    "@raycast/api": "^1.68.1",
+    "change-case": "^5.4.3",
+    "sponge-case": "^2.0.3",
+    "swap-case": "^3.0.3",
+    "title-case": "^4.3.1"
   },
   "devDependencies": {
-    "@types/node": "~18.6.4",
-    "@types/react": "^18.0.15",
-    "@typescript-eslint/eslint-plugin": "^5.32.0",
-    "@typescript-eslint/parser": "^5.32.0",
-    "eslint": "^8.21.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.25.0",
-    "typescript": "^4.7.4"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.25",
+    "@types/react": "18.2.64",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

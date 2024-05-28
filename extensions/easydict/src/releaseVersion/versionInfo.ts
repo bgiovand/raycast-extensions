@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-11-01 22:09
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-05-17 22:34
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,28 +26,33 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.6.2";
-  buildNumber = 18;
-  versionDate = "2022-11-02";
-  isNeedPrompt = false;
+  version = "2.9.1";
+  buildNumber = 27;
+  versionDate = "2024-01-08";
+  isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 🐞 修复
+### 💎 优化
 
-- 修复了 DeepL 翻译额度超支时会有错误提示问题。
-- 更新法语朗读声音。
+- 支持自定义 OpenAI API URL，感谢 [liyaodong](https://github.com/liyaodong) 的 PR。
+- 优化了语种识别功能，添加百度语种识别为默认选项。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
+## 推荐
+
+我另一个免费开源项目，[Easydict](https://github.com/tisfeng/Easydict) ，一个简洁优雅的词典翻译 macOS App。开箱即用，支持离线 OCR 识别，支持有道词典，🍎 苹果系统词典，🍎 苹果系统翻译，ChatGPT，DeepL，Google，Bing，腾讯，百度，阿里，小牛，彩云和火山翻译。
+
+![iShot_2023-03-17_18.01.22_11zon-1679050206](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-03-17_18.01.22_11zon-1679050206.jpg)
+
 ---
 
-### 🐞 Fixes
+### ✨ New Features
 
-- Fixed the problem that an error prompt will appear when DeepL translation quota is exceeded.
-- Updated French say voice.
+- Added OCR screenshot translation command, thanks to [aidevjoe](https://github.com/aidevjoe)'s PR.
 `;
 
   getRepoUrl() {

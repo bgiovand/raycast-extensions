@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   EPLStanding,
   EPLFixture,
@@ -25,18 +25,10 @@ interface PlayerResult {
   lastPage: boolean;
 }
 
-function showFailureToast() {
-  showToast(
-    Toast.Style.Failure,
-    "Something went wrong",
-    "Please try again later"
-  );
-}
-
-export const getSeasons = async () => {
+export const getSeasons = async (comps: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/competitions/1/compseasons`,
+    url: `${endpoint}/competitions/${comps}/compseasons`,
     params: {
       page: 0,
       pageSize: 100,
@@ -49,7 +41,7 @@ export const getSeasons = async () => {
 
     return data.content;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -66,7 +58,10 @@ export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
       altIds: true,
       compSeasons,
     },
-    headers,
+    headers: {
+      ...headers,
+      account: "premierleague",
+    },
   };
 
   try {
@@ -74,7 +69,7 @@ export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
 
     return data.content;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -92,7 +87,7 @@ export const getTeams = async (season: string) => {
 
     return data;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -116,7 +111,7 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
 
     return data.tables;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -127,6 +122,7 @@ export const getFixtures = async (props: {
   page: number;
   sort: string;
   statuses: string;
+  comps: string;
 }): Promise<[Content[], boolean]> => {
   if (props.teams === "-1") {
     delete props.teams;
@@ -136,7 +132,6 @@ export const getFixtures = async (props: {
     method: "get",
     url: `${endpoint}/fixtures`,
     params: {
-      comps: 1,
       pageSize: 40,
       altIds: true,
       ...props,
@@ -150,7 +145,7 @@ export const getFixtures = async (props: {
 
     return [data.content, lastPage];
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [[], false];
   }
@@ -159,7 +154,7 @@ export const getFixtures = async (props: {
 export const getPlayers = async (
   teams: string,
   season: string,
-  page: number
+  page: number,
 ): Promise<PlayerResult> => {
   const params: { [key: string]: string | number | boolean } = {
     pageSize,
@@ -188,7 +183,7 @@ export const getPlayers = async (
 
     return { players: data.content, lastPage };
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return { players: [], lastPage: true };
   }
@@ -196,7 +191,7 @@ export const getPlayers = async (
 
 export const getStaffs = async (
   team: string,
-  season: string
+  season: string,
 ): Promise<PlayerResult> => {
   const config: AxiosRequestConfig = {
     method: "get",
@@ -216,7 +211,7 @@ export const getStaffs = async (
 
     return { players: data.players, lastPage: true };
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return { players: [], lastPage: true };
   }
@@ -243,7 +238,7 @@ export const getManagers = async (compSeasons: string) => {
 
     return data.content;
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return [];
   }
@@ -251,7 +246,7 @@ export const getManagers = async (compSeasons: string) => {
 
 export const getPlayersWithTerms = async (
   terms: string,
-  page: number
+  page: number,
 ): Promise<PlayerResult> => {
   const config: AxiosRequestConfig = {
     method: "get",
@@ -273,7 +268,7 @@ export const getPlayersWithTerms = async (
 
     return { players, lastPage };
   } catch (e) {
-    showFailureToast();
+    showFailureToast(e);
 
     return { players: [], lastPage: true };
   }

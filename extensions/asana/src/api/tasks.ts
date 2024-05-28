@@ -36,6 +36,7 @@ export type Task = {
   name: string;
   due_at: string | null;
   due_on: string | null;
+  start_on: string | null;
   completed: boolean;
   permalink_url: string;
   projects: Project[];
@@ -45,7 +46,7 @@ export type Task = {
 };
 
 const taskFields =
-  "id,name,due_on,due_at,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -89,6 +90,7 @@ type TaskPayload = {
   projects: string[];
   description: string;
   due_on: string;
+  start_on: string;
   assignee: string;
   custom_fields: Record<string, string>;
 }>;
@@ -105,6 +107,7 @@ export async function createTask(payload: TaskPayload) {
 type UpdateTaskPayload = Partial<{
   completed: boolean;
   assignee: string | null;
+  due_on: Date | null;
   custom_fields: Record<string, string | null>;
 }>;
 

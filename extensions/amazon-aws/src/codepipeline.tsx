@@ -2,12 +2,14 @@ import {
   CodePipelineClient,
   ListPipelineExecutionsCommand,
   ListPipelinesCommand,
+  PipelineExecutionStatus,
   PipelineSummary,
 } from "@aws-sdk/client-codepipeline";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function CodePipeline() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -30,40 +32,45 @@ export default function CodePipeline() {
 function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
   const { data: execution } = useCachedPromise(fetchExecutionState, [pipeline.name]);
 
-  const status = execution?.status || "Idle";
+  const status = execution?.status;
 
   return (
     <List.Item
-      id={pipeline.name}
       key={pipeline.name}
       title={pipeline.name || ""}
       icon={"aws-icons/cp.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={`${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${pipeline.name}/view?region=${process.env.AWS_REGION}`}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(pipeline.name, "AWS::CodePipeline::Pipeline")} />
           <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
         </ActionPanel>
       }
-      accessories={[{ text: status }, { icon: iconMap[status] }]}
+      accessories={[
+        status
+          ? {
+              tag: { value: status, color: statusToIconAndColorMap[status].color },
+              icon: statusToIconAndColorMap[status].icon,
+            }
+          : { tag: "NotStarted", icon: Icon.CircleEllipsis },
+      ]}
     />
   );
 }
 
-const iconMap: { [key: string]: Icon } = {
-  Failed: Icon.ExclamationMark,
-  Idle: Icon.Circle,
-  InProgress: Icon.CircleProgress50,
-  Succeeded: Icon.CircleProgress100,
-  Stopped: Icon.CircleFilled,
+const statusToIconAndColorMap: Record<PipelineExecutionStatus, { icon: Icon; color: Color }> = {
+  [PipelineExecutionStatus.Failed]: { icon: Icon.XMarkCircleFilled, color: Color.Red },
+  [PipelineExecutionStatus.InProgress]: { icon: Icon.CircleProgress, color: Color.Blue },
+  [PipelineExecutionStatus.Succeeded]: { icon: Icon.CheckRosette, color: Color.Green },
+  [PipelineExecutionStatus.Stopped]: { icon: Icon.Important, color: Color.Orange },
+  [PipelineExecutionStatus.Cancelled]: { icon: Icon.CircleDisabled, color: Color.Yellow },
+  [PipelineExecutionStatus.Stopping]: { icon: Icon.Important, color: Color.Orange },
+  [PipelineExecutionStatus.Superseded]: { icon: Icon.BandAid, color: Color.Blue },
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
-  if (!process.env.AWS_PROFILE) return [];
+  if (!isReadyToFetch()) return [];
   const { nextToken, pipelines } = await new CodePipelineClient({}).send(
-    new ListPipelinesCommand({ nextToken: token })
+    new ListPipelinesCommand({ nextToken: token }),
   );
   const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
@@ -80,7 +87,7 @@ async function fetchExecutionState(pipelineName?: string) {
   }
 
   const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
-    new ListPipelineExecutionsCommand({ pipelineName })
+    new ListPipelineExecutionsCommand({ pipelineName }),
   );
   return pipelineExecutionSummaries?.[0];
 }

@@ -1,5 +1,14 @@
 # Sentry Changelog
 
+## [Added pagination] - 2024-03-27
+
+- Added pagination support.
+- Updated `@raycast/api` and `@raycast/utils` to latest versions.
+
+## [Added custom URL] - 2023-03-06
+
+- Replaced the hardcoded Sentry URL (sentry.io) with a dynamic URL that can be selected from the extension settings, allowing users to connect to a self-hosted Sentry instance of their choice.
+
 ## [Detail Support] - 2022-09-15
 
 - Added a detail view and an action to assign issues.

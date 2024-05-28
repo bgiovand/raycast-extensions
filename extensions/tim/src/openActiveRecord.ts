@@ -1,14 +1,22 @@
-import {
-  buildScriptEnsuringTimIsRunning,
-  checkIfTimInstalled,
-  runAppleScriptSilently,
-  showNotInstalledToast,
-} from "./utils";
+import { Toast, showToast } from "@raycast/api";
 
-export default async () => {
-  const timAvailable = await checkIfTimInstalled();
-  if (!timAvailable) return showNotInstalledToast();
+import { getActiveTask, installedWrapper, openActiveRecord } from "./lib/tim";
 
-  const script = buildScriptEnsuringTimIsRunning(`openactiverecord`);
-  await runAppleScriptSilently(script);
-};
+export default installedWrapper(async () => {
+  try {
+    const id = await getActiveTask();
+    if (!id) {
+      return showToast({
+        title: "No active task",
+        style: Toast.Style.Failure,
+      });
+    }
+
+    await openActiveRecord();
+  } catch (error) {
+    showToast({
+      title: "Active record could be opened",
+      style: Toast.Style.Failure,
+    });
+  }
+});
